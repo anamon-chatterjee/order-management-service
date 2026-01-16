@@ -31,17 +31,17 @@ public class OrderController {
     }
 
     @PostMapping("/{id}/confirm")
-    public OrderResponse confirmOrder(@PathVariable UUID id) {
+    public OrderResponse confirmOrder(@PathVariable("id") UUID id) {
         return toResponse(orderService.confirmOrder(id));
     }
 
     @PostMapping("/{id}/cancel")
-    public OrderResponse cancelOrder(@PathVariable UUID id) {
+    public OrderResponse cancelOrder(@PathVariable("id") UUID id) {
         return toResponse(orderService.cancelOrder(id));
     }
 
     @GetMapping("/{id}")
-    public OrderResponse getOrder(@PathVariable UUID id) {
+    public OrderResponse getOrder(@PathVariable("id") UUID id) {
         return toResponse(orderService.getOrder(id));
     }
 
