@@ -14,13 +14,7 @@ target/
 .sts4-cache
 
 ### IntelliJ IDEA ###
-.idea
-.idea/misc.xml
-.idea/modules.xml
-.idea/order-management-service.iml
-.idea/vcs.xml
-.idea/workspace.xml
-.idea/.gitignore
+.idea/
 
 *.iws
 *.iml
