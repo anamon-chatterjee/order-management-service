@@ -1,7 +1,9 @@
 package com.example.oms.exception;
 
+import com.example.oms.config.CorrelationIdFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -25,7 +27,8 @@ public class GlobalExceptionHandler {
                 "ORDER_NOT_FOUND",
                 ex.getMessage(),
                 Instant.now(),
-                request.getRequestURI()
+                request.getRequestURI(),
+                MDC.get(CorrelationIdFilter.MDC_KEY)
         );
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
@@ -40,7 +43,8 @@ public class GlobalExceptionHandler {
                 "INVALID_ORDER_STATE",
                 ex.getMessage(),
                 Instant.now(),
-                request.getRequestURI()
+                request.getRequestURI(),
+                MDC.get(CorrelationIdFilter.MDC_KEY)
         );
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
@@ -65,6 +69,7 @@ public class GlobalExceptionHandler {
                 "Request validation failed",
                 Instant.now(),
                 request.getRequestURI(),
+                MDC.get(CorrelationIdFilter.MDC_KEY),
                 validationErrors
         );
 
@@ -89,6 +94,7 @@ public class GlobalExceptionHandler {
                 "Constraint violation",
                 Instant.now(),
                 request.getRequestURI(),
+                MDC.get(CorrelationIdFilter.MDC_KEY),
                 validationErrors
         );
 
@@ -104,7 +110,8 @@ public class GlobalExceptionHandler {
                 "METHOD_NOT_ALLOWED",
                 "HTTP method not supported for this endpoint",
                 Instant.now(),
-                request.getRequestURI()
+                request.getRequestURI(),
+                MDC.get("correlationId")
         );
 
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(apiError);

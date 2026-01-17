@@ -8,9 +8,10 @@ public record ApiError(
         String message,
         Instant timestamp,
         String path,
+        String correlationId,
         List<ValidationError> errors
 ) {
-    public ApiError(String code, String message, Instant timestamp, String path) {
-        this(code, message, timestamp, path, null);
+    public ApiError(String code, String message, Instant timestamp, String path, String correlationId) {
+        this(code, message, timestamp, path, correlationId, null);
     }
 }
