@@ -21,26 +21,48 @@ spring:
   lifecycle:
     timeout-per-shutdown-phase: 30s
 
+
+server:
+  shutdown: graceful
+
+
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info,metrics,prometheus
+
   endpoint:
     health:
       show-details: never
       probes:
         enabled: true
+
   health:
     livenessstate:
       enabled: true
     readinessstate:
       enabled: true
-server:
-  shutdown: graceful
+
+  # 🔑 THIS WAS MISSING / MISPLACED
+  observations:
+    enabled: true
+
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0   # 100% for local/dev
+
+  otlp:
+    tracing:
+      enabled: false
+      endpoint: http://localhost:4317
+
+  metrics:
+    tags:
+      application: order-management-service
+
 
 logging:
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [corrId=%X{correlationId}] - %msg%n"
-
-
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} [traceId=%X{traceId}, spanId=%X{spanId}, corrId=%X{correlationId}] - %msg%n"

@@ -5,6 +5,8 @@ import com.example.oms.domain.enums.OrderStatus;
 import com.example.oms.exception.InvalidOrderStateException;
 import com.example.oms.exception.OrderNotFoundException;
 import com.example.oms.repository.OrderRepository;
+import io.micrometer.tracing.annotation.NewSpan;
+import io.micrometer.tracing.annotation.SpanTag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -55,7 +57,8 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    public Order getOrder(UUID orderId) {
+    @NewSpan("fetch-order")
+    public Order getOrder(@SpanTag("order.id") UUID orderId) {
         log.info("Fetching order with id={}", orderId);
         return getOrderOrThrow(orderId);
     }
