@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -47,9 +48,9 @@ public class OrderService {
     public Order cancelOrder(UUID orderId) {
         Order order = getOrderOrThrow(orderId);
 
-        if (order.getStatus() == OrderStatus.DELIVERED) {
+        if (List.of(OrderStatus.DELIVERED, OrderStatus.CONFIRMED).contains(order.getStatus())) {
             throw new InvalidOrderStateException(
-                    "Delivered orders cannot be cancelled"
+                    "Delivered or Confirmed orders cannot be cancelled"
             );
         }
 

@@ -6,6 +6,7 @@ import com.example.oms.dto.OrderResponse;
 import com.example.oms.service.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -20,6 +21,7 @@ public class OrderController {
         this.orderService = orderService;
     }
 
+    @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public OrderResponse createOrder(@Valid @RequestBody CreateOrderRequest request) {
@@ -30,16 +32,22 @@ public class OrderController {
         return toResponse(order);
     }
 
+    @PreAuthorize("hasAnyRole('OPS','ADMIN')")
     @PostMapping("/{id}/confirm")
     public OrderResponse confirmOrder(@PathVariable("id") UUID id) {
         return toResponse(orderService.confirmOrder(id));
     }
 
+    @PreAuthorize("hasAnyRole('CUSTOMER','OPS','ADMIN')")
     @PostMapping("/{id}/cancel")
     public OrderResponse cancelOrder(@PathVariable("id") UUID id) {
         return toResponse(orderService.cancelOrder(id));
     }
 
+    @PreAuthorize(
+            "hasRole('ADMIN') or " +
+            "(hasRole('CUSTOMER') and @orderSecurity.isOwner(#id))"
+    )
     @GetMapping("/{id}")
     public OrderResponse getOrder(@PathVariable("id") UUID id) {
         return toResponse(orderService.getOrder(id));
