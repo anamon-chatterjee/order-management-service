@@ -5,9 +5,12 @@ import com.example.oms.domain.enums.OrderStatus;
 import com.example.oms.exception.InvalidOrderStateException;
 import com.example.oms.exception.OrderNotFoundException;
 import com.example.oms.repository.OrderRepository;
+import com.example.oms.security.CustomUserDetails;
 import io.micrometer.tracing.annotation.NewSpan;
 import io.micrometer.tracing.annotation.SpanTag;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -26,7 +29,11 @@ public class OrderService {
 
     public Order createOrder(UUID customerId, BigDecimal totalAmount) {
         Order order = new Order();
-        order.setCustomerId(customerId);
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails user = (CustomUserDetails)auth.getPrincipal();
+
+        order.setCustomerId(user.getUserId());
         order.setTotalAmount(totalAmount);
         return orderRepository.save(order);
     }

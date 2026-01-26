@@ -5,7 +5,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.UUID;
 
-public class SecurityUtils {
+public final class SecurityUtils {
+    private SecurityUtils() {}
+
     public static UUID currentUserId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();

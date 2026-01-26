@@ -38,7 +38,10 @@ public class OrderController {
         return toResponse(orderService.confirmOrder(id));
     }
 
-    @PreAuthorize("hasAnyRole('CUSTOMER','OPS','ADMIN')")
+    @PreAuthorize(
+            "hasRole('ADMIN') or " +
+            "hasRole('CUSTOMER') and @orderSecurity.isOwner(#id)"
+    )
     @PostMapping("/{id}/cancel")
     public OrderResponse cancelOrder(@PathVariable("id") UUID id) {
         return toResponse(orderService.cancelOrder(id));

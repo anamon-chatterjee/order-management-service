@@ -14,7 +14,7 @@ public class OrderSecurity {
 
     public boolean isOwner(UUID orderId) {
         UUID currentUser = SecurityUtils.currentUserId();
-        return orderRepository.existsByIdAndUserId(orderId, currentUser);
+        return orderRepository.existsByIdAndCustomerId(orderId, currentUser);
     }
 }
 
