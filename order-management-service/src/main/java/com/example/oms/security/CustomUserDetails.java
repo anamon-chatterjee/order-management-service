@@ -42,6 +42,8 @@ public class CustomUserDetails implements UserDetails {
         return user.isEnabled();
     }
 
+    public UserEntity getUser() { return user; }
+
     // keep these simple for now
     @Override public boolean isAccountNonExpired() { return true; }
     @Override public boolean isAccountNonLocked() { return true; }

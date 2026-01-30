@@ -39,5 +39,31 @@ public class RefreshTokenService {
         return repository.findByToken(token)
                 .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
     }
+
+    public RefreshToken verifyAndRotate(String tokenValue) {
+        RefreshToken oldToken = repository.findByToken(tokenValue)
+                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+
+        if (oldToken.isRevoked()) {
+            // Token reuse detected → revoke everything
+            repository.revokeAllByUser(oldToken.getUser());
+            throw new RuntimeException("Refresh token reuse detected. All sessions revoked.");
+        }
+
+        if (oldToken.getExpiryDate().isBefore(Instant.now())) {
+            throw new RuntimeException("Refresh token expired");
+        }
+
+        // Invalidate old token
+        oldToken.setRevoked(true);
+
+        // Create new refresh token
+        RefreshToken newToken = new RefreshToken();
+        newToken.setToken(UUID.randomUUID().toString());
+        newToken.setUser(oldToken.getUser());
+        newToken.setExpiryDate(Instant.now().plus(7, ChronoUnit.DAYS));
+
+        return repository.save(newToken);
+    }
 }
 

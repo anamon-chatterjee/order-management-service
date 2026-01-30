@@ -2,15 +2,18 @@ package com.example.oms.security.auth;
 
 import com.example.oms.domain.entity.UserEntity;
 import com.example.oms.repository.UserRepository;
+import com.example.oms.security.CustomUserDetails;
 import com.example.oms.security.auth.dto.LoginRequest;
 import com.example.oms.security.auth.dto.LoginResponse;
 import com.example.oms.security.auth.dto.RefreshRequest;
 import com.example.oms.security.jwt.JwtUtil;
 import com.example.oms.security.refresh.RefreshToken;
+import com.example.oms.security.refresh.RefreshTokenRepository;
 import com.example.oms.security.refresh.RefreshTokenService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,17 +30,20 @@ public class AuthController {
     private final UserDetailsService userDetailsService;
     private final UserRepository userRepository;
     private final RefreshTokenService refreshTokenService;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     public AuthController(AuthenticationManager authenticationManager,
                           JwtUtil jwtUtil,
                           UserDetailsService userDetailsService,
                           UserRepository userRepository,
-                          RefreshTokenService refreshTokenService) {
+                          RefreshTokenService refreshTokenService,
+                          RefreshTokenRepository refreshTokenRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
         this.userRepository = userRepository;
         this.refreshTokenService = refreshTokenService;
+        this.refreshTokenRepository = refreshTokenRepository;
 
     }
 
@@ -72,22 +78,31 @@ public class AuthController {
     public ResponseEntity<LoginResponse> refresh(
             @RequestBody RefreshRequest request
     ) {
-        RefreshToken refreshToken =
-                refreshTokenService.getByToken(request.refreshToken());
 
-        refreshTokenService.verifyExpiration(refreshToken);
+        RefreshToken newRefreshToken =
+                refreshTokenService.verifyAndRotate(request.refreshToken());
 
-        UserEntity user = refreshToken.getUser();
+        UserEntity user = newRefreshToken.getUser();
 
-        UserDetails userDetails =
-                userDetailsService.loadUserByUsername(user.getUsername());
+        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
 
         String newAccessToken =
                 jwtUtil.generateToken(userDetails);
 
         return ResponseEntity.ok(
                 new LoginResponse(newAccessToken, request.refreshToken())
+
         );
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(Authentication authentication) {
+
+        UserEntity user = ((CustomUserDetails) authentication.getPrincipal()).getUser();
+
+        refreshTokenRepository.revokeAllByUser(user);
+
+        return ResponseEntity.noContent().build();
     }
 
 }
