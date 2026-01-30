@@ -2,6 +2,10 @@ spring:
   application:
     name: order-management-service
 
+  profiles:
+    active:
+      - default
+
   datasource:
     url: jdbc:h2:mem:omsdb
     driver-class-name: org.h2.Driver
