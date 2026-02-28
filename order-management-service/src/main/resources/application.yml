@@ -34,11 +34,11 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        include: health,info,metrics,prometheus,circuitbreakers
 
   endpoint:
     health:
-      show-details: never
+      show-details: always
       probes:
         enabled: true
 
@@ -47,15 +47,16 @@ management:
       enabled: true
     readinessstate:
       enabled: true
+    circuitbreakers:
+      enabled: true   # Enables CB health indicator
 
-  # 🔑 THIS WAS MISSING / MISPLACED
   observations:
     enabled: true
 
   tracing:
     enabled: true
     sampling:
-      probability: 1.0   # 100% for local/dev
+      probability: 1.0
 
   otlp:
     tracing:
@@ -77,3 +78,23 @@ management:
 logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} [traceId=%X{traceId}, spanId=%X{spanId}, corrId=%X{correlationId}] - %msg%n"
+
+
+# =========================
+# Resilience4j Configuration
+# =========================
+
+resilience4j:
+  retry:
+    instances:
+      inventoryRetry:
+        maxAttempts: 3
+        waitDuration: 2s
+  circuitbreaker:
+    instances:
+      paymentCircuit:
+        slidingWindowSize: 3
+        minimumNumberOfCalls: 3
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 2

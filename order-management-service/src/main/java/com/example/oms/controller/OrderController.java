@@ -4,6 +4,7 @@ import com.example.oms.domain.entity.Order;
 import com.example.oms.dto.CreateOrderRequest;
 import com.example.oms.dto.OrderResponse;
 import com.example.oms.service.OrderService;
+import com.example.oms.service.PaymentClient;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,9 +17,11 @@ import java.util.UUID;
 public class OrderController {
 
     private final OrderService orderService;
+    private final PaymentClient paymentClient;
 
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService, PaymentClient paymentClient) {
         this.orderService = orderService;
+        this.paymentClient = paymentClient;
     }
 
     @PreAuthorize("hasRole('CUSTOMER')")
@@ -54,6 +57,11 @@ public class OrderController {
     @GetMapping("/{id}")
     public OrderResponse getOrder(@PathVariable("id") UUID id) {
         return toResponse(orderService.getOrder(id));
+    }
+
+    @PostMapping("/{orderId}/pay")
+    public String pay(@PathVariable String orderId) {
+        return paymentClient.executePayment(orderId);
     }
 
     private OrderResponse toResponse(Order order) {
