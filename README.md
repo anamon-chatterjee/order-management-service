@@ -19,7 +19,7 @@ Client → API Gateway → Order Service → Inventory Service → Database
 - Spring Boot
 - Spring Security (JWT)
 - Resilience4j
-- MySQL
+- Postgres
 
 ---
 
